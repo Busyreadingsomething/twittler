@@ -3,22 +3,103 @@
   <head>
     <script src="jquery.js"></script>
     <script src="data_generator.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <link href="https://fonts.googleapis.com/css?family=Roboto|Vollkorn" rel="stylesheet" rel="stylesheet" type="text/css">
   </head>
   <body>
+
+    <header>
+      <h1 id="logo">Twittler</h1>
+      <img src="cat-48.png">
+      <p id="motto">Can you get this working?</p>
+    </header>
+    <nav id="buttons">
+      <span class="new">See New</span>
+      <span class="clear">Clear</span>
+      <span class='show'>Show Twits</span>
+    </nav>
+    <div id='main'>
+      <div id='current_user'>
+        <h2>Makan Azarshahy</h2>
+        <h3>@tootles</h3>
+        <div class="total_twits"></div>
+      </div>
+      <div id="list">
+      </div>
+    </div>
     <script>
 
+      let total_twits = 0;
+      let counter = 0;
+      let display = 0;
+
       $(document).ready(function(){
-        var $body = $('body');
-        $body.html('');
+        var $twit = $('#list');
+        $twit.html('');
 
         var index = streams.home.length - 1;
         while(index >= 0){
           var tweet = streams.home[index];
-          var $tweet = $('<div></div>');
-          $tweet.text('@' + tweet.user + ': ' + tweet.message);
-          $tweet.appendTo($body);
+          var $tweet = $("<div class='twit'></div>");
+          $tweet.html("<span class='user'>@" + tweet.user + "</span>" + "<span class='message'>: " + tweet.message + "</span>" + "<p class='stamp'>" + tweet.created_at + "</p>");
+          $tweet.prependTo($twit).hide().slideDown('slow');
+          total_twits++;
           index -= 1;
         }
+
+        function watchArray(){
+          counter = streams.home.length-1;
+          display = counter - total_twits; 
+          setTimeout(watchArray, 300);
+        }
+        watchArray(); //Checks the tweets in the array.
+    
+        function changeNumber(){
+          if(display < 1){
+            $('.total_twits').hide();
+          }
+          else{
+            $('.total_twits').fadeIn().text("New Tweets: " + display);
+          }
+          setTimeout(changeNumber, 10);
+        }
+        changeNumber();
+
+        $('.new').on('click', function() {
+          var display = streams.home.length - 1;
+          while(display >= total_twits){
+            var tweet = streams.home[display];
+            var $tweet = $("<div class='twit'></div>");
+            $tweet.html("<span class='user'>@<span class='person'>" + tweet.user + "</span></span>" + "<span class='message'>: " + tweet.message + "</span>" + "<p class='stamp'>" + tweet.created_at + "</p>");
+            $tweet.prependTo($twit).hide().slideDown('slow');
+            total_twits++;
+            display -= 1;
+          }
+        });
+
+        $('.clear').on('click', function() {
+          $('.twit').remove();
+        });
+
+        $('.user').on('click', function() {
+          // getting the person of interest
+          debugger;
+          var person = $(this).text().slice(1);
+          console.log(person);
+          $('.twit').remove();
+          var i = 0;
+          var len = streams.users[person].length - 1
+
+          // adds the tweets from the collection
+          while (i <= len) {
+            var tweet = streams.users[person][i];
+            console.log(tweet);
+            var $tweet = $("<div class='twit'></div>");
+            $tweet.html("<span class='user'>@" + person + "</span>" + "<span class='message'>: " + tweet.message + "</span>" + "<p class='stamp'>" + tweet.created_at + "</p>");
+            $tweet.prependTo($twit).hide().slideDown('slow');
+            i += 1;
+          }
+        });
 
       });
 
