@@ -16,13 +16,14 @@
     <nav id="buttons">
       <span class="new">See New</span>
       <span class="clear">Clear</span>
-      <span class='show'>Show Twits</span>
+      <span class='show'>All Twits</span>
     </nav>
     <div id='main'>
       <div id='current_user'>
         <h2>Makan Azarshahy</h2>
         <h3>@tootles</h3>
-        <div class="total_twits"></div>
+        <span>New Twits: </span>
+        <span class="total_twits"></span>
       </div>
       <div id="list">
       </div>
@@ -47,23 +48,15 @@
           index -= 1;
         }
 
-        function watchArray(){
-          counter = streams.home.length-1;
-          display = counter - total_twits; 
-          setTimeout(watchArray, 300);
+        function newTwitCount(){
+          display = streams.home.length - 1 - total_twits; 
+          setTimeout(newTwitCount, 300);
         }
-        watchArray(); //Checks the tweets in the array.
     
-        function changeNumber(){
-          if(display < 1){
-            $('.total_twits').hide();
-          }
-          else{
-            $('.total_twits').fadeIn().text("New Tweets: " + display);
-          }
-          setTimeout(changeNumber, 10);
+        function displayChange(){
+          display < 1 ? $('.total_twits').hide() : $('.total_twits').fadeIn().text(display);
+          setTimeout(displayChange, 10);
         }
-        changeNumber();
 
         $('.new').on('click', function() {
           var display = streams.home.length - 1;
@@ -75,31 +68,54 @@
             total_twits++;
             display -= 1;
           }
+          listUserTweets();
         });
 
         $('.clear').on('click', function() {
           $('.twit').remove();
         });
 
-        $('.user').on('click', function() {
-          // getting the person of interest
-          debugger;
-          var person = $(this).text().slice(1);
-          console.log(person);
+        $('.show').on('click', function () {
           $('.twit').remove();
-          var i = 0;
-          var len = streams.users[person].length - 1
-
-          // adds the tweets from the collection
-          while (i <= len) {
-            var tweet = streams.users[person][i];
-            console.log(tweet);
+          let allTwits = streams.home.length;
+          for (let i = 0; i < allTwits; i++) {
+            var tweet = streams.home[i];
             var $tweet = $("<div class='twit'></div>");
-            $tweet.html("<span class='user'>@" + person + "</span>" + "<span class='message'>: " + tweet.message + "</span>" + "<p class='stamp'>" + tweet.created_at + "</p>");
+            $tweet.html("<span class='user'>@<span class='person'>" + tweet.user + "</span></span>" + "<span class='message'>: " + tweet.message + "</span>" + "<p class='stamp'>" + tweet.created_at + "</p>");
             $tweet.prependTo($twit).hide().slideDown('slow');
-            i += 1;
+            total_twits = allTwits - 1;
           }
+          listUserTweets();
         });
+
+        $('#motto').on('click', function() {
+          alert("It's a secret to everybody:\nhttp://homestarrunner.com/sbemail80.html")
+        })
+
+        function listUserTweets() {
+          $('.user').on('click', function() {
+            // getting the person of interest
+            var person = $(this).text().slice(1);
+            console.log(person);
+            $('.twit').remove();
+            var i = 0;
+            var len = streams.users[person].length;
+
+            // adds the tweets from the collection
+            while (i < len) {
+              var tweet = streams.users[person][i];
+              var $tweet = $("<div class='twit'></div>");
+              $tweet.html("<span class='user'>@" + person + "</span>" + "<span class='message'>: " + tweet.message + "</span>" + "<p class='stamp'>" + tweet.created_at + "</p>");
+              $tweet.prependTo($twit).hide().slideDown('slow');
+              i += 1;
+            }
+            listUserTweets();
+          });
+        }
+
+        newTwitCount();
+        displayChange();
+        listUserTweets();
 
       });
 
